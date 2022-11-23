@@ -9,11 +9,6 @@ import argparse
 import json
 import datetime
 
-#Method for checking existence of path i.e the directory
-
-def get_person_id():
-    return int(datetime.datetime.now().timestamp())
-
 
 def load_names_file():
     try:
@@ -38,10 +33,11 @@ def assure_path_exists(path):
 
 parser = argparse.ArgumentParser(description='Face datasets')
 parser.add_argument('-n','--name',type=str, help='Name of the person',required=True)
-
+parser.add_argument('-i','--id',type=int, help='ID of the person',required=True)
 args = parser.parse_args()
+
 names_obj = load_names_file()
-face_id = get_person_id()
+face_id = args.id
 names_obj[face_id] = args.name
 
 print('Face ID for {} is {}'.format(args.name,face_id))

@@ -13,7 +13,7 @@ This is the given task or assignment for the role of data science intern at abso
 ```
     pip3 install opencv-python --default-timeout=10009
     pip3 install opencv-contrib-python --default-timeout=10009
-    pip3 install numpy pillow openpyxl pandas
+    pip3 install numpy pillow openpyxl pandas tabulate
 ```
 
 ## Run

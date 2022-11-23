@@ -11,6 +11,9 @@ import os
 import json
 import pandas as pd
 import datetime
+import argparse
+import time
+from tabulate import tabulate
 
 #Method for checking existence of path i.e the directory
 def assure_path_exists(path):
@@ -34,6 +37,9 @@ def add_attendance(name,id):
     df = pd.DataFrame(items,columns=['Name', 'ID', 'Date & Time'])
     df.to_excel(file_path,index=False)
 
+parser = argparse.ArgumentParser(description='Face recognition')
+parser.add_argument('-t','--time',type=int, help='Wait time in seconds',required=False,default=10)
+args = parser.parse_args()
 
 names_obj =load_names_file()
 if not names_obj:
@@ -59,9 +65,11 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 
 # Initialize and start the video frame capture from webcam
 cam = cv2.VideoCapture(0)
-
+end_time = time.time() + args.time
 # Looping starts here
-while True:
+
+recognized_faces = {}
+while time.time() < end_time:
     # Read the video frame
     ret, im =cam.read()
 
@@ -87,11 +95,8 @@ while True:
                 showStr = "{} {:.2f}%".format(name,round(100 - confidence, 2))
                 cv2.rectangle(im, (x-22,y-90), (x+w+22, y-22), (0,255,0), -1)
                 cv2.putText(im, str(showStr), (x,y-40), font, 1, (255,255,255), 3)
-                print('='*120)
-                print('Attendance accepted for: "{}" with ID: "{}"'.format(name,IdStr))
-                print('='*120)
-                add_attendance(name,IdStr)
-                exit(0)
+                
+                recognized_faces[IdStr] = name
             else:
                 showStr = "Unknown {:.2f}%".format(round(100 - confidence, 2))
                 cv2.rectangle(im, (x-22,y-90), (x+w+22, y-22), (0,255,0), -1)
@@ -109,6 +114,19 @@ while True:
     # press q to close the program
     if cv2.waitKey(10) & 0xFF == ord('q'):
         break
+
+if recognized_faces:
+    print('\nRecognized faces:')
+    rows = []
+    i =1
+    for k,v in recognized_faces.items():
+        rows.append([i,k,v])
+        i = i + 1
+        add_attendance(v,k)
+    print(tabulate(rows, headers=['S.NO','ID','Name'],tablefmt='grid'))
+    print('\n')
+else:
+    print('No faces recognized')
 
 # Terminate video
 cam.release()
