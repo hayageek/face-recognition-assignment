@@ -5,13 +5,49 @@
 #Os is required for managing files like directories
 import cv2
 import os
+import argparse
+import json
+import datetime
 
 #Method for checking existence of path i.e the directory
+
+def get_person_id():
+    return int(datetime.datetime.now().timestamp())
+
+
+def load_names_file():
+    try:
+        with open(os.path.join(os.path.dirname(__file__),'names.json')) as f:
+            return json.load(f)
+    except:
+        return {}
+
+def save_names_file(obj):
+    try:
+        with open(os.path.join(os.path.dirname(__file__),'names.json'),'w') as f:
+            json.dump(obj, f)
+    except Exception as e:
+        print(e)
+        print('Error saving names file')
 
 def assure_path_exists(path):
     dir = os.path.dirname(path)
     if not os.path.exists(dir):
         os.makedirs(dir)
+
+
+parser = argparse.ArgumentParser(description='Face datasets')
+parser.add_argument('-n','--name',type=str, help='Name of the person',required=True)
+
+args = parser.parse_args()
+names_obj = load_names_file()
+face_id = get_person_id()
+names_obj[face_id] = args.name
+
+print('Face ID for {} is {}'.format(args.name,face_id))
+
+# save the names dictionary in file
+save_names_file(names_obj)
 
 # Starting the web cam by invoking the VideoCapture method
 vid_cam = cv2.VideoCapture(0)
@@ -19,8 +55,6 @@ vid_cam = cv2.VideoCapture(0)
 # For detecting the faces in each frame we will use Haarcascade Frontal Face default classifier of OpenCV
 face_detector = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 
-# Set unique id for each individual person
-face_id = 1
 
 # Variable for counting the no. of images
 count = 0
@@ -69,3 +103,5 @@ vid_cam.release()
 
 # Terminate all started windows
 cv2.destroyAllWindows()
+
+

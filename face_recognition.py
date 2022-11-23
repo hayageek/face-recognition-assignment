@@ -8,12 +8,25 @@
 import cv2
 import numpy as np
 import os 
+import json
 
 #Method for checking existence of path i.e the directory
 def assure_path_exists(path):
     dir = os.path.dirname(path)
     if not os.path.exists(dir):
         os.makedirs(dir)
+
+def load_names_file():
+    try:
+        with open(os.path.join(os.path.dirname(__file__),'names.json')) as f:
+            return json.load(f)
+    except:
+        return {}
+
+names_obj =load_names_file()
+if not names_obj:
+    print('Unable to load names.json, please run face_datasets.py first')
+    exit(-1)
 
 # Create Local Binary Patterns Histograms for face recognization
 recognizer = cv2.face.LBPHFaceRecognizer_create()
@@ -35,6 +48,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 # Initialize and start the video frame capture from webcam
 cam = cv2.VideoCapture(0)
 
+print(names_obj)
 # Looping starts here
 while True:
     # Read the video frame
@@ -56,20 +70,16 @@ while True:
         Id, confidence = recognizer.predict(gray[y:y+h,x:x+w])  #Our trained model is working here
 
         # Set the name according to id
-        if Id == 1:
-            Id = "Varun {0:.2f}%".format(round(100 - confidence, 2))
-            # Put text describe who is in the picture
-        elif Id == 2 :
-            Id = "Amartya {0:.2f}%".format(round(100 - confidence, 2))
-            # Put text describe who is in the picture
-        elif Id == 3:
-            Id = "Darshan {0:.2f}%".format(round(100 - confidence, 2))
+        IdStr = str(Id)
+        if IdStr in names_obj:
+            name = names_obj[IdStr] 
+            showStr = "{} {:.2f}%".format(name,round(100 - confidence, 2))
+            # Set rectangle around face and name of the person
+            cv2.rectangle(im, (x-22,y-90), (x+w+22, y-22), (0,255,0), -1)
+            cv2.putText(im, str(showStr), (x,y-40), font, 1, (255,255,255), 3)
         else:
             pass
 
-        # Set rectangle around face and name of the person
-        cv2.rectangle(im, (x-22,y-90), (x+w+22, y-22), (0,255,0), -1)
-        cv2.putText(im, str(Id), (x,y-40), font, 1, (255,255,255), 3)
 
     # Display the video frame with the bounded rectangle
     cv2.imshow('im',im) 
