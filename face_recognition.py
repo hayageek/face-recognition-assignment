@@ -9,6 +9,8 @@ import cv2
 import numpy as np
 import os 
 import json
+import pandas as pd
+import datetime
 
 #Method for checking existence of path i.e the directory
 def assure_path_exists(path):
@@ -22,6 +24,16 @@ def load_names_file():
             return json.load(f)
     except:
         return {}
+def add_attendance(name,id):
+    file_path = os.path.join(os.path.dirname(__file__),'attendance.xlsx')
+    df = pd.DataFrame(columns=['Name', 'ID', 'Date & Time'])
+    if os.path.exists(file_path):
+        df = pd.read_excel(file_path)
+    items = df.values.tolist()
+    items.append([name,id,datetime.datetime.now()])
+    df = pd.DataFrame(items,columns=['Name', 'ID', 'Date & Time'])
+    df.to_excel(file_path,index=False)
+
 
 names_obj =load_names_file()
 if not names_obj:
@@ -48,7 +60,6 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 # Initialize and start the video frame capture from webcam
 cam = cv2.VideoCapture(0)
 
-print(names_obj)
 # Looping starts here
 while True:
     # Read the video frame
@@ -63,22 +74,33 @@ while True:
     # For each face in faces, we will start predicting using pre trained model
     for(x,y,w,h) in faces:
 
-        # Create rectangle around the face
-        cv2.rectangle(im, (x-20,y-20), (x+w+20,y+h+20), (0,255,0), 4)
 
         # Recognize the face belongs to which ID
-        Id, confidence = recognizer.predict(gray[y:y+h,x:x+w])  #Our trained model is working here
+        Id, confidence = recognizer.predict(gray[y:y+h,x:x+w])
+        #print(Id, confidence)
+        if int(confidence) < 40 :
+            #create rectangle
+            cv2.rectangle(im, (x-20,y-20), (x+w+20,y+h+20), (0,255,0), 4)
+            IdStr = str(Id)
+            if IdStr in names_obj:
+                name = names_obj[IdStr]
+                showStr = "{} {:.2f}%".format(name,round(100 - confidence, 2))
+                cv2.rectangle(im, (x-22,y-90), (x+w+22, y-22), (0,255,0), -1)
+                cv2.putText(im, str(showStr), (x,y-40), font, 1, (255,255,255), 3)
+                print('='*120)
+                print('Attendance accepted for: "{}" with ID: "{}"'.format(name,IdStr))
+                print('='*120)
+                add_attendance(name,IdStr)
+                exit(0)
+            else:
+                showStr = "Unknown {:.2f}%".format(round(100 - confidence, 2))
+                cv2.rectangle(im, (x-22,y-90), (x+w+22, y-22), (0,255,0), -1)
+                cv2.putText(im, str(showStr), (x,y-40), font, 1, (255,255,255), 3)
 
-        # Set the name according to id
-        IdStr = str(Id)
-        if IdStr in names_obj:
-            name = names_obj[IdStr] 
-            showStr = "{} {:.2f}%".format(name,round(100 - confidence, 2))
-            # Set rectangle around face and name of the person
-            cv2.rectangle(im, (x-22,y-90), (x+w+22, y-22), (0,255,0), -1)
-            cv2.putText(im, str(showStr), (x,y-40), font, 1, (255,255,255), 3)
         else:
-            pass
+            cv2.rectangle(im, (x-20,y-20), (x+w+20,y+h+20), (255,0,0), 4)
+            cv2.rectangle(im, (x-22,y-90), (x+w+22, y-22), (255,0,0), -1)
+            cv2.putText(im, "Unknown", (x,y-40), font, 1, (255,255,255), 3)
 
 
     # Display the video frame with the bounded rectangle

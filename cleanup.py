@@ -12,12 +12,15 @@ def remove_directory(dirname):
     except:
         pass
 
+def remove_file(filename):
+    file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),filename)
+    os.remove(file_path)
+
 try:
     remove_directory('training_data')
     remove_directory('saved_model')
-    names_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),'names.json')
-    print(names_file_path)
-    os.remove(names_file_path)
+    remove_file('names.json')
+    remove_file('attendance.xlsx')
 except Exception as e:
     print(e)
     pass
