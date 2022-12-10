@@ -1,5 +1,3 @@
-##Author:Amartya Kalapahar
-##Project: Absolute Face Technologies Internship Assignment
 
 # We will import openCV library for image processing, opening the webcam etc
 #Os is required for managing files like directories
@@ -79,8 +77,6 @@ while(True):
         if(len(eyes) != 2):
             break;
 
-        for (ex,ey,ew,eh) in eyes:
-            cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(255,255,0),2)
 
         # Crop the image frame into rectangle
         cv2.rectangle(image_frame, (x,y), (x+w,y+h), (255,0,0), 2)

@@ -1,5 +1,3 @@
-##Author:Amartya Kalapahar
-##Project: Absolute Face Technologies Internship Assignment
 
 # We will import openCV library for image processing, opening the webcam etc
 #Os is required for managing files like directories
@@ -90,10 +88,6 @@ while time.time() < end_time:
 
         if(len(eyes) != 2):
             break;
-
-        for (ex,ey,ew,eh) in eyes:
-            cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(255,255,0),2)
-
 
         # Recognize the face belongs to which ID
         Id, confidence = recognizer.predict(gray[y:y+h,x:x+w])

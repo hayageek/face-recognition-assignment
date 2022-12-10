@@ -1,5 +1,4 @@
-##Author:Amartya Kalapahar
-##Project: Absolute Face Technologies Internship Assignment
+
 
 # We will import openCV library for image processing, opening the webcam etc
 #Os is required for managing files like directories
