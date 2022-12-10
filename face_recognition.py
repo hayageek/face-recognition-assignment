@@ -59,6 +59,7 @@ cascadePath = "haarcascade_frontalface_default.xml"
 
 # Create classifier from prebuilt model
 faceCascade = cv2.CascadeClassifier(cascadePath);
+eye_classifier  =cv2.CascadeClassifier('haarcascade_eye.xml')
 
 # font style
 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -82,11 +83,22 @@ while time.time() < end_time:
     # For each face in faces, we will start predicting using pre trained model
     for(x,y,w,h) in faces:
 
+        roi_color=im[y:y+h,x:x+w]
+        roi_gray=gray[y:y+h,x:x+w]
+
+        eyes=eye_classifier.detectMultiScale(roi_gray)
+
+        if(len(eyes) != 2):
+            break;
+
+        for (ex,ey,ew,eh) in eyes:
+            cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(255,255,0),2)
+
 
         # Recognize the face belongs to which ID
         Id, confidence = recognizer.predict(gray[y:y+h,x:x+w])
         #print(Id, confidence)
-        if int(confidence) < 40 :
+        if int(confidence) < 50 :
             #create rectangle
             cv2.rectangle(im, (x-20,y-20), (x+w+20,y+h+20), (0,255,0), 4)
             IdStr = str(Id)

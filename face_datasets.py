@@ -50,7 +50,7 @@ vid_cam = cv2.VideoCapture(0)
 
 # For detecting the faces in each frame we will use Haarcascade Frontal Face default classifier of OpenCV
 face_detector = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-
+eye_classifier  =cv2.CascadeClassifier('haarcascade_eye.xml')
 
 # Variable for counting the no. of images
 count = 0
@@ -72,6 +72,15 @@ while(True):
 
     # Looping through all the detected faces in the frame
     for (x,y,w,h) in faces:
+        roi_color=image_frame[y:y+h,x:x+w]
+        roi_gray=gray[y:y+h,x:x+w]
+        eyes=eye_classifier.detectMultiScale(roi_gray)
+
+        if(len(eyes) != 2):
+            break;
+
+        for (ex,ey,ew,eh) in eyes:
+            cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(255,255,0),2)
 
         # Crop the image frame into rectangle
         cv2.rectangle(image_frame, (x,y), (x+w,y+h), (255,0,0), 2)
